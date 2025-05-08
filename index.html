@@ -1,0 +1,84 @@
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body onload="init();" style="position: relative; display: flex; justify-content: center; align-items: center;">
+    <div class="chart-container" style="height:80vh; width:80vw; ">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        const ctx = document.getElementById('myChart');
+
+        const get_data = (labels, train_loss, test_loss) => ({
+            labels: labels,
+            datasets: [{
+                label: 'Train loss',
+                data: train_loss,
+                fill: {
+                target: 1,
+                above: 'rgba(56, 196, 139, 0.1)',   // Area will be black above
+                below: 'rgba(255, 64, 64, 0.1)'    // And green below
+                },
+                borderColor: 'rgb(56, 196, 139)',
+                tension: 0.3
+            },
+            {
+                label: 'Test loss',
+                data: test_loss,
+                borderColor: 'rgb(255, 64, 64)',
+                tension: 0.3
+            }]
+        });
+
+
+        function init(labels=[1, 2, 3, 4, 5, 6, 7], train_loss=[65, 59, 80, 81, 56, 55, 40], test_loss=[25, 39, 15, 41, 56, 75, 80]) {
+            ;
+
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: get_data(labels, train_loss, test_loss),
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        }
+                    },
+                    animations: {
+                        tension: {
+                            duration: 1000,
+                            easing: 'linear',
+                            from: 0.45,
+                            to: 0.3,
+                            loop: true
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true
+                },
+            });
+        }
+
+        window.onmessage = (event) => {
+            if(event.data && event.data.train_loss.length == event.data.test_loss.length) {
+
+                window.myChart.data = get_data(
+                    [...Array(event.data.train_loss.length).keys()], 
+                    event.data.train_loss, 
+                    event.data.test_loss
+                )
+                window.myChart.update('none');
+                console.log("Losses:", event.data.train_loss, event.data.test_loss);
+            }
+        }
+    </script>
+</body>
+
+</html>
